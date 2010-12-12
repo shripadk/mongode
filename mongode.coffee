@@ -1,5 +1,4 @@
 Db 			  =	require('mongodb').Db
-Connection	  =	require('mongodb').Connection
 Server		  = require('mongodb').Server
 EventEmitter  = require('events').EventEmitter
 sys			  = require('sys')
@@ -61,14 +60,44 @@ class Mongode extends EventEmitter
 						@logError e
 						callback e, null
 					if collection
-						collection.insert data, (e, docs) =>
+						collection.insert data, (e, docs) => # Test failed! docs return unchanged value.
 							if e
 								@emit 'error', e
 								@logError e
 								callback e, null
 							if docs
-								@logInfo "Inserted doc(s)! Command: insertInto"
+								@logInfo "Inserted doc! Command: insertInto"
 								callback null, docs
+		
+	save : (col, doc, options, callback) ->
+		if @connected
+			if !callback
+				@handleCallback()
+				return true
+			if !col
+				return true
+				@handleCollection()
+			if !docs
+				@logError "No data specified for insertion! Command: insertAllInto"
+				return true
+			if !options
+				@logError "No options specified for insertion! Command: insertAllInto"
+				return true
+			if doc and col
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.save doc, options, (e, doc) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if docs
+								@logInfo "Saved doc! Command: save"
+								callback null, doc
 	
 	findAll : (col, callback) ->
 		if @connected
@@ -152,4 +181,35 @@ class Mongode extends EventEmitter
 							if doc
 								@logInfo "Fetched doc! Command: findOne"
 								callback null, doc
+	find : (col, arguments..., callback) ->
+		argument0 = arguments[0] or {}
+		argument1 = arguments[1] or {}		
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				return true
+				@handleCollection()			
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.find argument0, argument1, (e, cursor) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if cursor
+								cursor.toArray (e, docs) =>
+									if e
+										@emit 'error', e
+										@logError e
+										callback e, null
+									if docs
+										@logInfo "Fetched all doc(s)! Command: find"
+										callback null, docs
 exports.Mongode = Mongode
