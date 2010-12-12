@@ -5,13 +5,10 @@ EventEmitter  = require('events').EventEmitter
 sys			  = require('sys')
 colors		  = require('colors')
 
-host = if process.env['MONGO_NODE_DRIVER_HOST'] then process.env['MONGO_NODE_DRIVER_HOST'] else 'localhost'
-port = if process.env['MONGO_NODE_DRIVER_PORT'] then process.env['MONGO_NODE_DRIVER_PORT'] else Connection.DEFAULT_PORT
-
 class Mongode extends EventEmitter
 	constructor: (database, host, port, serverConfig, options) ->
 		@database   	= database
-		@host 			= host or 'localhost'
+		@host 			= host or '127.0.0.1'
 		@port 			= port or 27017
 		@serverConfig   = serverConfig || {}
 		@options 		= options || {}
