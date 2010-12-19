@@ -4,6 +4,7 @@ EventEmitter  = require('events').EventEmitter
 sys			  = require('sys')
 colors		  = require('colors')
 
+
 class Mongode extends EventEmitter
 	constructor: (database, host, port, serverConfig, options) ->
 		@database   	= database
