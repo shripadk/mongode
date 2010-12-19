@@ -334,4 +334,138 @@ class Mongode extends EventEmitter
 								@logInfo "Updated document!"
 								callback null, c
 				
+	createIndex : (col, spec, unique, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if !spec
+				@emit 'error', "Specify the 'spec' for indexing"
+				@logError 'error', "Specify the 'spec' for indexing"
+				return true
+			if !unique then unique = {}
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.createIndex spec, unique, (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "Indexed document!"
+								callback null, c
+				
+	ensureIndex : (col, spec, unique, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if !spec
+				@emit 'error', "Specify the 'spec' for indexing"
+				@logError 'error', "Specify the 'spec' for indexing"
+				return true
+			if !unique then unique = {}
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.ensureIndex spec, unique, (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "Indexed document!"
+								callback null, c
+				
+	dropIndex : (col, spec, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if !spec
+				@emit 'error', "Specify the 'spec' for dropping index"
+				@logError 'error', "Specify the 'spec' for dropping index"
+				return true
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.dropIndex spec, (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "dropped index!"
+								callback null, c
+				
+	dropIndexes : (col, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.dropIndexes (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "Removed all indexes for this collection!"
+								callback null, c
+				
+	indexInformation : (col, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.indexInformation (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "Got Index information from #{collection}!"
+								callback null, c
+				
 exports.Mongode = Mongode
