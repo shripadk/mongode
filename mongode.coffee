@@ -467,5 +467,66 @@ class Mongode extends EventEmitter
 							if c
 								@logInfo "Got Index information from #{collection}!"
 								callback null, c
+
+
+	count : (col, spec, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if !spec
+				@emit 'error', "Specify the 'spec' for count()"
+				@logError 'error', "Specify the 'spec' for count()"
+				return true
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.count spec, (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "Fetched count!"
+								callback null, c
+				
+	distinct : (col, key, spec, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if !key
+				@emit 'error', "Specify the 'key' for distinct()"
+				@logError 'error', "Specify the 'key' for distinct()"
+				return true
+			if !spec
+				@emit 'error', "Specify the 'spec' for distinct()"
+				@logError 'error', "Specify the 'spec' for distinct()"
+				return true
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.distinct key, spec, (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "Distinct()!"
+								callback null, c
 				
 exports.Mongode = Mongode
