@@ -48,8 +48,8 @@ class Mongode extends EventEmitter
 				@handleCallback()
 				return true
 			if !col
-				return true
 				@handleCollection()
+				return true
 			if !data
 				@logError "No data specified for insertion! Command: insertInto"
 				return true
@@ -75,8 +75,8 @@ class Mongode extends EventEmitter
 				@handleCallback()
 				return true
 			if !col
-				return true
 				@handleCollection()
+				return true
 			if !docs
 				@logError "No data specified for insertion! Command: insertAllInto"
 				return true
@@ -105,8 +105,8 @@ class Mongode extends EventEmitter
 				@handleCallback()
 				return true
 			if !col
-				return true
 				@handleCollection()
+				return true
 			if col and callback
 				@db.collection col, (e, collection) =>
 					if e
@@ -135,8 +135,8 @@ class Mongode extends EventEmitter
 				@handleCallback()
 				return true
 			if !col
-				return true
 				@handleCollection()
+				return true
 			if col and callback
 				@db.collection col, (e, collection) =>
 					if e
@@ -152,6 +152,7 @@ class Mongode extends EventEmitter
 							if doc
 								@logInfo "Fetched doc! Command: findFirst"
 								callback null, doc
+
 	findOne : (col, query, options, callback) ->
 		if @connected
 			if !query or typeof query is 'function'
@@ -164,8 +165,8 @@ class Mongode extends EventEmitter
 				@handleCallback()
 				return true
 			if !col
-				return true
 				@handleCollection()
+				return true
 			if col and callback
 				@db.collection col, (e, collection) =>
 					if e
@@ -181,16 +182,18 @@ class Mongode extends EventEmitter
 							if doc
 								@logInfo "Fetched doc! Command: findOne"
 								callback null, doc
+
 	find : (col, arguments..., callback) ->
 		argument0 = arguments[0] or {}
-		argument1 = arguments[1] or {}		
+		argument1 = arguments[1] or {}
+		argument2 = arguments[2] or {}		
 		if @connected
 			if !callback and typeof callback != 'function'
 				@handleCallback()
 				return true
 			if !col
-				return true
 				@handleCollection()			
+				return true
 			if col and callback
 				@db.collection col, (e, collection) =>
 					if e
@@ -198,7 +201,7 @@ class Mongode extends EventEmitter
 						@logError e
 						callback e, null
 					if collection
-						collection.find argument0, argument1, (e, cursor) =>
+						collection.find argument0, argument1, argument2, (e, cursor) =>
 							if e
 								@emit 'error', e
 								@logError e
@@ -212,4 +215,122 @@ class Mongode extends EventEmitter
 									if docs
 										@logInfo "Fetched all doc(s)! Command: find"
 										callback null, docs
+										
+	removeFrom : (col, data, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if !data
+				@emit 'error', "No data specified for removal! Command: remove"
+				@logError "No data specified for removal! Command: remove"
+				return true
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.remove data, (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "Removed the document! Command: remove"
+								callback null, data
+	
+	dropCollection : (col, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.drop (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "Removed the collection! Command: remove"
+								callback null, c
+	
+	replaceDocument : (col, query, data, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if !query or !data
+				@emit 'error', "Specify the query and data for replaceDocument"
+				@logError 'error', "Specify the query and data for replaceDocument"
+				return true
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.findOne query, (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "Fetched document. findOne : #{c}"
+								collection.update c, data, (e, c) =>
+									if e
+										@emit 'error', e
+										@logError e
+										callback e, null
+									if c
+										@logInfo "Replaced entire document!"
+										callback null, c
+	
+										
+	update : (col, spec, document, options, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if !spec or !document
+				@emit 'error', "Specify the 'spec' and 'document' for update"
+				@logError 'error', "Specify the 'spec' and 'document' for update"
+				return true
+			if !options then options = {}
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.update spec, document, options, (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "Updated document!"
+								callback null, c
+				
 exports.Mongode = Mongode
