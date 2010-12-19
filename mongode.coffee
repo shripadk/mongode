@@ -529,4 +529,32 @@ class Mongode extends EventEmitter
 								@logInfo "Distinct()!"
 								callback null, c
 				
+	group : (col, keys, condition, initial, reduce, command, callback) ->
+		if @connected
+			if !callback and typeof callback != 'function'
+				@handleCallback()
+				return true
+			if !col
+				@handleCollection()
+				return true
+			if !keys or !condition or !initial or !reduce or !command
+				@emit 'error', "Specify the 'options' for group()"
+				@logError 'error', "Specify the 'options' for group()"
+				return true
+			if col and callback
+				@db.collection col, (e, collection) =>
+					if e
+						@emit 'error', e
+						@logError e
+						callback e, null
+					if collection
+						collection.group keys, condition, initial, reduce, command, (e, c) =>
+							if e
+								@emit 'error', e
+								@logError e
+								callback e, null
+							if c
+								@logInfo "group()!"
+								callback null, c
+				
 exports.Mongode = Mongode
